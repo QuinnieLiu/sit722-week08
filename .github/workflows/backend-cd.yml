@@ -85,9 +85,11 @@ jobs:
         run: |
           az aks get-credentials --resource-group ${{ env.aks_resource_group }} --name ${{ env.aks_cluster_name }} --overwrite-existing
 
-      - name: Attach ACR
+      - name: Verify ACR Integration
         run: |
-          az aks update --name ${{ env.aks_cluster_name }} --resource-group ${{ env.aks_resource_group }} --attach-acr ${{ env.aks_acr_name }}
+          echo "✅ ACR was attached during AKS cluster creation"
+          echo "Verifying ACR integration..."
+          az aks check-acr --name ${{ env.aks_cluster_name }} --resource-group ${{ env.aks_resource_group }} --acr ${{ env.aks_acr_name }}
 
       - name: Deploy Backend Infrastructure (Namespace, ConfigMaps, Secrets, Databases)
         run: |

@@ -19,10 +19,28 @@ env:
   IMAGE_TAG: pr-${{ github.event.number }}-${{ github.sha }}
 
 jobs:
+  # Job to detect changes
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.changes.outputs.backend }}
+      frontend: ${{ steps.changes.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            backend:
+              - 'backend/**'
+            frontend:
+              - 'frontend/**'
+
   # Job 1: Validate Backend Changes
   validate_backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'backend/')
 
     services:
       # Product DB container for testing
@@ -111,8 +129,9 @@ jobs:
 
   # Job 2: Validate Frontend Changes
   validate_frontend:
+    needs: changes
+    if: ${{ needs.changes.outputs.frontend == 'true' }}
     runs-on: ubuntu-latest
-    if: contains(github.event.pull_request.changed_files, 'frontend/')
 
     steps:
       - name: Checkout repository
@@ -143,6 +162,7 @@ jobs:
   # Job 3: Security and Quality Gate
   security_check:
     runs-on: ubuntu-latest
+    # Always run security checks regardless of changed files
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

@@ -1,4 +1,5 @@
 // week08/frontend/main.js
+// version 1.0.1
 
 document.addEventListener('DOMContentLoaded', () => {
     // API endpoints for the Product and Order services.
